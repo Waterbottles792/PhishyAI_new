@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Shield, Menu, X } from "lucide-react"
 import Link from "next/link"
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -55,12 +56,23 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="#demo"
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Try It Now
-            </Link>
+            <SignedOut>
+              <Link
+                href="/sign-in"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Sign In
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link
+                href="/dashboard"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Dashboard
+              </Link>
+              <UserButton />
+            </SignedIn>
           </div>
 
           <button
@@ -92,13 +104,27 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="#demo"
-                onClick={() => setMobileOpen(false)}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground text-center hover:bg-primary/90 transition-colors"
-              >
-                Try It Now
-              </Link>
+              <SignedOut>
+                <Link
+                  href="/sign-in"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground text-center hover:bg-primary/90 transition-colors"
+                >
+                  Sign In
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground text-center hover:bg-primary/90 transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <div className="flex justify-center py-2">
+                  <UserButton />
+                </div>
+              </SignedIn>
             </div>
           </motion.div>
         )}

@@ -1,9 +1,9 @@
 """Email analysis endpoint."""
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from sqlalchemy.orm import Session
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from ..schemas.request import AnalyzeRequest
 from ..schemas.response import AnalyzeResponse, RiskIndicator, FeatureImportance
@@ -12,6 +12,8 @@ from ..models.model_registry import model_registry
 from ..explainability import SHAPExplainer
 from ..database.db import get_db, save_analysis
 from ..features.linguistic import LinguisticAnalyzer
+from ..services.gemini_service import get_gemini_analysis
+from ..services.anomaly_service import anomaly_detector
 
 router = APIRouter()
 
@@ -244,7 +246,9 @@ def generate_highlighted_words(body: str, features: Dict) -> List[Dict]:
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_email(
     request: AnalyzeRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    x_user_id: Optional[str] = Header(None),
+    user_id: Optional[str] = None,
 ):
     """
     Analyze a single email for phishing indicators.
@@ -257,6 +261,9 @@ async def analyze_email(
         Analysis response with prediction, confidence, and explanations
     """
     try:
+        # Resolve user ID: prefer explicit param (from image_analyze), fall back to header
+        resolved_user_id = user_id or x_user_id
+
         # Get model
         model_name = request.model_name or "random_forest"
         predictor = model_registry.get_model(model_name)
@@ -312,6 +319,19 @@ async def analyze_email(
         # Generate highlighted words
         highlighted_words = generate_highlighted_words(request.body, features_dict)
 
+        # AI-powered features: Gemini analysis + anomaly detection
+        gemini_result = await get_gemini_analysis(
+            subject=request.subject or "",
+            body=request.body,
+            prediction=prediction,
+            confidence=confidence,
+            risk_score=risk_score,
+            threat_level=threat_level,
+            risk_indicators=risk_indicators_list,
+        )
+
+        anomaly_score = anomaly_detector.score(features_array)
+
         # Save to database
         save_analysis(
             db=db,
@@ -324,7 +344,8 @@ async def analyze_email(
             model_used=model_name,
             features=features_dict,
             indicators=risk_indicators_list,
-            explanation=explanation
+            explanation=explanation,
+            user_id=resolved_user_id,
         )
 
         # Build response
@@ -339,7 +360,12 @@ async def analyze_email(
             top_phishing_indicators=top_phishing_indicators,
             top_legitimate_indicators=top_legitimate_indicators,
             features_extracted=features_dict,
-            highlighted_words=highlighted_words
+            highlighted_words=highlighted_words,
+            ai_explanation=gemini_result.ai_explanation,
+            safety_recommendations=gemini_result.safety_recommendations,
+            email_category=gemini_result.email_category,
+            category_confidence=gemini_result.category_confidence,
+            anomaly_score=anomaly_score,
         )
 
         return response

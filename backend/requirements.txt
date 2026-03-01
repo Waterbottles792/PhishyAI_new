@@ -19,3 +19,6 @@ requests
 beautifulsoup4
 tldextract
 validators
+google-generativeai
+pytesseract
+Pillow

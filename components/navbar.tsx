@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowUpRight } from "lucide-react"
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
 
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "How it Works", href: "#how-it-works" },
   { label: "Models", href: "#models" },
   { label: "Demo", href: "#demo" },
-  { label: "Dashboard", href: "/dashboard" },
 ]
 
 export function Navbar() {
@@ -58,16 +58,36 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
+            <SignedIn>
+              <a
+                href="/dashboard"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Dashboard
+              </a>
+            </SignedIn>
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
-            <a
-              href="/dashboard"
-              className="group flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:brightness-110"
-            >
-              Get Started
-              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
+            <SignedOut>
+              <a
+                href="/sign-in"
+                className="group flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:brightness-110"
+              >
+                Sign In
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            </SignedOut>
+            <SignedIn>
+              <a
+                href="/dashboard"
+                className="group flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:brightness-110"
+              >
+                Dashboard
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+              <UserButton />
+            </SignedIn>
           </div>
 
           <button
@@ -99,14 +119,30 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <a
-                href="/dashboard"
-                onClick={() => setMobileOpen(false)}
-                className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
-              >
-                Get Started
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
+              <SignedIn>
+                <a
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-lg text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Dashboard
+                </a>
+              </SignedIn>
+              <SignedOut>
+                <a
+                  href="/sign-in"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
+                >
+                  Sign In
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              </SignedOut>
+              <SignedIn>
+                <div className="mt-2 flex items-center justify-center">
+                  <UserButton />
+                </div>
+              </SignedIn>
             </div>
           </motion.div>
         )}

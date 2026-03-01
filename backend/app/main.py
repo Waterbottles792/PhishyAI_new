@@ -10,12 +10,14 @@ from contextlib import asynccontextmanager
 from .config import settings
 from .database.db import init_db
 from .models.model_registry import model_registry
+from .services.anomaly_service import anomaly_detector
 from .routes import (
     analyze_router,
     batch_router,
     models_router,
     dashboard_router,
     history_router,
+    image_analyze_router,
 )
 
 
@@ -38,6 +40,10 @@ async def lifespan(app: FastAPI):
     else:
         print("⚠ Warning: No trained models found!")
         print("  Please run: python scripts/train.py")
+
+    # Initialize anomaly detector
+    anomaly_detector.initialize()
+    print("✓ Anomaly detector initialized")
 
     print("=" * 60)
     print(f"API ready at http://{settings.API_HOST}:{settings.API_PORT}")
@@ -94,6 +100,7 @@ app.include_router(batch_router, prefix="/api", tags=["Batch Analysis"])
 app.include_router(models_router, prefix="/api", tags=["Models"])
 app.include_router(dashboard_router, prefix="/api", tags=["Dashboard"])
 app.include_router(history_router, prefix="/api", tags=["History"])
+app.include_router(image_analyze_router, prefix="/api", tags=["Image Analysis"])
 
 
 @app.get("/")

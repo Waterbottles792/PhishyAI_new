@@ -13,6 +13,7 @@ class AnalysisHistory(Base):
     __tablename__ = "analysis_history"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(100), nullable=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
     subject = Column(Text, nullable=False)
     body_preview = Column(Text, nullable=True)  # First 200 chars

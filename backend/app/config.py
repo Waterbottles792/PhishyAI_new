@@ -52,6 +52,14 @@ class Settings(BaseSettings):
 
     # Optional API Keys
     OPENAI_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.0-flash"
+
+    # OCR Configuration
+    TESSERACT_CMD: str = ""
+
+    # Anomaly Detection
+    ANOMALY_CONTAMINATION: float = 0.1
 
     class Config:
         env_file = ".env"

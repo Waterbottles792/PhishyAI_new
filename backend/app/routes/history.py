@@ -1,8 +1,8 @@
 """Analysis history endpoints."""
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Header
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
 
 from ..database.db import (
@@ -19,21 +19,23 @@ router = APIRouter()
 async def get_history(
     limit: int = Query(default=50, ge=1, le=500, description="Maximum number of results"),
     offset: int = Query(default=0, ge=0, description="Offset for pagination"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    x_user_id: Optional[str] = Header(None),
 ):
     """
-    Get analysis history.
+    Get analysis history filtered by user.
 
     Args:
         limit: Maximum number of results
         offset: Offset for pagination
         db: Database session
+        x_user_id: Optional Clerk user ID from header
 
     Returns:
         List of historical analyses
     """
     try:
-        history = get_analysis_history(db, limit=limit, offset=offset)
+        history = get_analysis_history(db, limit=limit, offset=offset, user_id=x_user_id)
 
         results = []
         for item in history:
@@ -110,7 +112,8 @@ async def get_history_detail(
 @router.delete("/history/{analysis_id}")
 async def delete_history_item(
     analysis_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    x_user_id: Optional[str] = Header(None),
 ):
     """
     Delete an analysis from history.
@@ -118,12 +121,13 @@ async def delete_history_item(
     Args:
         analysis_id: ID of the analysis to delete
         db: Database session
+        x_user_id: Optional Clerk user ID from header
 
     Returns:
         Success message
     """
     try:
-        success = delete_analysis(db, analysis_id)
+        success = delete_analysis(db, analysis_id, user_id=x_user_id)
 
         if not success:
             raise HTTPException(status_code=404, detail=f"Analysis {analysis_id} not found")

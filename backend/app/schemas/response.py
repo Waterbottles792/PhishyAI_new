@@ -1,7 +1,7 @@
 """Response schemas for API endpoints."""
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class RiskIndicator(BaseModel):
@@ -36,6 +36,14 @@ class AnalyzeResponse(BaseModel):
     top_legitimate_indicators: List[FeatureImportance] = Field(..., description="Top legitimate indicators")
     features_extracted: Dict[str, Any] = Field(..., description="Raw extracted features")
     highlighted_words: List[Dict[str, Any]] = Field(..., description="Words to highlight in the email")
+
+    # AI-powered features (optional - populated when Gemini API key is set)
+    ai_explanation: Optional[str] = Field(None, description="AI-generated plain English explanation")
+    safety_recommendations: Optional[List[str]] = Field(None, description="AI-generated safety recommendations")
+    email_category: Optional[str] = Field(None, description="AI-classified email category")
+    category_confidence: Optional[float] = Field(None, description="Confidence in email category (0-1)")
+    anomaly_score: Optional[float] = Field(None, description="Anomaly score (0-100, higher = more unusual)")
+    ocr_text: Optional[str] = Field(None, description="Text extracted via OCR from uploaded image")
 
     class Config:
         json_schema_extra = {

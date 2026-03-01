@@ -45,7 +45,8 @@ def save_analysis(
     model_used: str,
     features: Dict,
     indicators: List[Dict],
-    explanation: Dict
+    explanation: Dict,
+    user_id: Optional[str] = None
 ) -> AnalysisHistory:
     """
     Save analysis result to database.
@@ -62,6 +63,7 @@ def save_analysis(
         features: Extracted features
         indicators: Risk indicators
         explanation: SHAP explanation
+        user_id: Optional Clerk user ID
 
     Returns:
         Saved AnalysisHistory object
@@ -69,6 +71,7 @@ def save_analysis(
     body_preview = body[:200] if len(body) > 200 else body
 
     analysis = AnalysisHistory(
+        user_id=user_id,
         subject=subject,
         body_preview=body_preview,
         prediction=prediction,
@@ -91,21 +94,25 @@ def save_analysis(
 def get_analysis_history(
     db: Session,
     limit: int = 50,
-    offset: int = 0
+    offset: int = 0,
+    user_id: Optional[str] = None
 ) -> List[AnalysisHistory]:
     """
-    Get analysis history.
+    Get analysis history, optionally filtered by user.
 
     Args:
         db: Database session
         limit: Maximum number of results
         offset: Offset for pagination
+        user_id: Optional Clerk user ID to filter by
 
     Returns:
         List of AnalysisHistory objects
     """
-    return db.query(AnalysisHistory)\
-        .order_by(AnalysisHistory.timestamp.desc())\
+    query = db.query(AnalysisHistory)
+    if user_id:
+        query = query.filter(AnalysisHistory.user_id == user_id)
+    return query.order_by(AnalysisHistory.timestamp.desc())\
         .limit(limit)\
         .offset(offset)\
         .all()
@@ -116,18 +123,22 @@ def get_analysis_by_id(db: Session, analysis_id: int) -> Optional[AnalysisHistor
     return db.query(AnalysisHistory).filter(AnalysisHistory.id == analysis_id).first()
 
 
-def delete_analysis(db: Session, analysis_id: int) -> bool:
+def delete_analysis(db: Session, analysis_id: int, user_id: Optional[str] = None) -> bool:
     """
     Delete analysis from history.
 
     Args:
         db: Database session
         analysis_id: ID of analysis to delete
+        user_id: Optional Clerk user ID to verify ownership
 
     Returns:
         True if deleted, False if not found
     """
-    analysis = db.query(AnalysisHistory).filter(AnalysisHistory.id == analysis_id).first()
+    query = db.query(AnalysisHistory).filter(AnalysisHistory.id == analysis_id)
+    if user_id:
+        query = query.filter(AnalysisHistory.user_id == user_id)
+    analysis = query.first()
     if analysis:
         db.delete(analysis)
         db.commit()

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useUser } from "@clerk/nextjs"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Shield,
@@ -18,6 +19,10 @@ import {
   Trash2,
   GitCompareArrows,
   ChevronDown,
+  Sparkles,
+  Tag,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -65,6 +70,12 @@ interface AnalysisResult {
   top_legitimate_indicators: (string | FeatureImportance)[]
   features_extracted: Record<string, number>
   highlighted_words: Array<{ word: string; type: string; position: number }>
+  ai_explanation?: string | null
+  safety_recommendations?: string[] | null
+  email_category?: string | null
+  category_confidence?: number | null
+  anomaly_score?: number | null
+  ocr_text?: string | null
 }
 
 interface HistoryItem {
@@ -151,8 +162,103 @@ function ResultCard({ result, compact = false }: { result: AnalysisResult; compa
           <Badge variant="outline">
             {result.model_used.replace(/_/g, " ")}
           </Badge>
+          {result.email_category && (
+            <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-500/20 dark:text-violet-400">
+              <Tag className="mr-1 h-3 w-3" />
+              {result.email_category.replace(/_/g, " ")}
+              {result.category_confidence != null && (
+                <span className="ml-1 opacity-70">{(result.category_confidence * 100).toFixed(0)}%</span>
+              )}
+            </Badge>
+          )}
         </div>
       </div>
+
+      {/* AI Explanation */}
+      {result.ai_explanation && (
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="rounded-xl border border-violet-500/20 bg-violet-500/[0.03] p-4"
+        >
+          <div className="mb-2 flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/10">
+              <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+            </div>
+            <p className="text-xs font-medium uppercase tracking-wider text-violet-600 dark:text-violet-400">
+              AI Explanation
+            </p>
+          </div>
+          <p className="text-sm leading-relaxed text-foreground/90">{result.ai_explanation}</p>
+        </motion.div>
+      )}
+
+      {/* Safety Recommendations */}
+      {result.safety_recommendations && result.safety_recommendations.length > 0 && (
+        <div>
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            Safety Recommendations
+          </p>
+          <div className="space-y-1.5">
+            {result.safety_recommendations.map((rec, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 + i * 0.05 }}
+                className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-2.5"
+              >
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                  {i + 1}
+                </span>
+                <p className="text-xs text-foreground/80">{rec}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Anomaly Score */}
+      {result.anomaly_score != null && (
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Anomaly Score
+          </p>
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">How unusual is this email?</span>
+              <span className={`text-sm font-bold ${
+                result.anomaly_score >= 70 ? "text-destructive" :
+                result.anomaly_score >= 40 ? "text-chart-4" :
+                "text-primary"
+              }`}>
+                {result.anomaly_score.toFixed(1)}%
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${result.anomaly_score}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className={`h-full rounded-full ${
+                  result.anomaly_score >= 70 ? "bg-destructive" :
+                  result.anomaly_score >= 40 ? "bg-chart-4" :
+                  "bg-primary"
+                }`}
+              />
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground">
+              {result.anomaly_score >= 70
+                ? "Highly unusual compared to training data"
+                : result.anomaly_score >= 40
+                  ? "Moderately unusual patterns detected"
+                  : "Within normal patterns"}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Risk Indicators */}
       {result.risk_indicators.length > 0 && (
@@ -279,6 +385,20 @@ function ResultCard({ result, compact = false }: { result: AnalysisResult; compa
         </div>
       )}
 
+      {/* OCR Text */}
+      {!compact && result.ocr_text && (
+        <details className="group">
+          <summary className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+            <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+            <ImageIcon className="h-3.5 w-3.5" />
+            OCR Extracted Text
+          </summary>
+          <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs text-foreground/80">
+            {result.ocr_text}
+          </pre>
+        </details>
+      )}
+
       {/* Extracted Features */}
       {!compact && result.features_extracted && Object.keys(result.features_extracted).length > 0 && (
         <details className="group">
@@ -303,6 +423,13 @@ function ResultCard({ result, compact = false }: { result: AnalysisResult; compa
 }
 
 export default function DashboardPage() {
+  const { user } = useUser()
+  const userHeaders = useMemo(() => {
+    const h: Record<string, string> = { "Content-Type": "application/json" }
+    if (user?.id) h["x-user-id"] = user.id
+    return h
+  }, [user?.id])
+
   const [subject, setSubject] = useState("")
   const [body, setBody] = useState("")
   const [model, setModel] = useState("random_forest")
@@ -312,6 +439,10 @@ export default function DashboardPage() {
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("analyze")
+
+  // Image upload state
+  const [imageUploading, setImageUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
 
   // Compare state
   const [compareLoading, setCompareLoading] = useState(false)
@@ -330,7 +461,7 @@ export default function DashboardPage() {
     try {
       const res = await fetch("http://localhost:8000/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: userHeaders,
         body: JSON.stringify({
           subject: subject.trim(),
           body: body.trim(),
@@ -351,6 +482,46 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleImageUpload(file: File) {
+    setError("")
+    setImageUploading(true)
+    setResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("model_name", model)
+
+      const headers: Record<string, string> = {}
+      if (user?.id) headers["x-user-id"] = user.id
+
+      const res = await fetch("http://localhost:8000/api/analyze/image", {
+        method: "POST",
+        headers,
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.detail || `Server error: ${res.status}`)
+
+      // Populate subject/body fields from OCR text
+      if (data.ocr_text) {
+        const lines = data.ocr_text.split("\n")
+        setSubject(lines[0] || "")
+        setBody(lines.slice(1).join("\n").trim() || data.ocr_text)
+      }
+
+      setResult(data)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to analyze image. Make sure the backend is running."
+      )
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
   async function handleCompare() {
     if (!body.trim()) {
       setCompareError("Please enter the email body to compare.")
@@ -365,7 +536,7 @@ export default function DashboardPage() {
         MODELS.map(async (m) => {
           const res = await fetch("http://localhost:8000/api/analyze", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: userHeaders,
             body: JSON.stringify({
               subject: subject.trim(),
               body: body.trim(),
@@ -391,7 +562,10 @@ export default function DashboardPage() {
   async function loadHistory() {
     setHistoryLoading(true)
     try {
-      const res = await fetch("http://localhost:8000/api/history?limit=20")
+      const headers: Record<string, string> = {}
+      if (user?.id) headers["x-user-id"] = user.id
+
+      const res = await fetch("http://localhost:8000/api/history?limit=20", { headers })
       if (!res.ok) throw new Error("Failed to load history")
       const data = await res.json()
       setHistory(Array.isArray(data) ? data : data.results ?? [])
@@ -404,7 +578,10 @@ export default function DashboardPage() {
 
   async function deleteHistory(id: number) {
     try {
-      await fetch(`http://localhost:8000/api/history/${id}`, { method: "DELETE" })
+      const headers: Record<string, string> = {}
+      if (user?.id) headers["x-user-id"] = user.id
+
+      await fetch(`http://localhost:8000/api/history/${id}`, { method: "DELETE", headers })
       setHistory((h) => h.filter((item) => item.id !== id))
     } catch {}
   }
@@ -625,6 +802,63 @@ export default function DashboardPage() {
                       </div>
                       <p className="text-xs text-muted-foreground">Internal work email</p>
                     </button>
+                  </CardContent>
+                </Card>
+
+                {/* Image Upload */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <ImageIcon className="h-4 w-4 text-primary" />
+                      Screenshot Analysis
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Upload a screenshot of an email for OCR-based analysis
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        setDragOver(false)
+                        const file = e.dataTransfer.files[0]
+                        if (file) handleImageUpload(file)
+                      }}
+                      className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors ${
+                        dragOver
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-muted-foreground/50"
+                      }`}
+                    >
+                      {imageUploading ? (
+                        <>
+                          <Loader2 className="mb-2 h-8 w-8 animate-spin text-primary" />
+                          <p className="text-xs text-muted-foreground">Extracting text & analyzing...</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+                          <p className="mb-1 text-xs font-medium text-foreground">
+                            Drop an image here or click to upload
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            PNG, JPG, GIF, BMP, TIFF, WEBP (max 10 MB)
+                          </p>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/gif,image/bmp,image/tiff,image/webp"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleImageUpload(file)
+                              e.target.value = ""
+                            }}
+                            className="absolute inset-0 cursor-pointer opacity-0"
+                          />
+                        </>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
