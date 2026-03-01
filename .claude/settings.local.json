@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p backend/app/{models,features,explainability,routes,schemas,database,utils} backend/data/{raw,processed,models} backend/notebooks backend/scripts backend/tests)",
+      "Bash(curl:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
