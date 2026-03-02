@@ -1,12 +1,37 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect, useCallback } from "react"
 import { motion, useInView } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
 
-export function CTASection() {
+interface CTASectionProps {
+  register?: (id: string, rect: DOMRect) => void
+  setActive?: (id: string, active: boolean) => void
+  unregister?: (id: string) => void
+}
+
+export function CTASection({ register, setActive, unregister }: CTASectionProps = {}) {
   const ref = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLAnchorElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const ATTRACTOR_ID = "cta-btn"
+
+  const updatePosition = useCallback(() => {
+    if (btnRef.current && register) {
+      register(ATTRACTOR_ID, btnRef.current.getBoundingClientRect())
+    }
+  }, [register])
+
+  useEffect(() => {
+    updatePosition()
+    window.addEventListener("scroll", updatePosition)
+    window.addEventListener("resize", updatePosition)
+    return () => {
+      window.removeEventListener("scroll", updatePosition)
+      window.removeEventListener("resize", updatePosition)
+      unregister?.(ATTRACTOR_ID)
+    }
+  }, [updatePosition, unregister])
 
   return (
     <section className="relative border-t border-border py-24 md:py-32">
@@ -30,7 +55,10 @@ export function CTASection() {
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <a
+            ref={btnRef}
             href="/dashboard"
+            onMouseEnter={() => { updatePosition(); setActive?.(ATTRACTOR_ID, true) }}
+            onMouseLeave={() => setActive?.(ATTRACTOR_ID, false)}
             className="group flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 hover:shadow-[0_0_30px_oklch(0.78_0.18_155/0.3)]"
           >
             Start Analyzing

@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     # Anomaly Detection
     ANOMALY_CONTAMINATION: float = 0.1
 
+    # Threat Intelligence
+    PHISHTANK_API_KEY: str = ""
+
     class Config:
         env_file = ".env"
         case_sensitive = True

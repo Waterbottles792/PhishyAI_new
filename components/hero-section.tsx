@@ -1,8 +1,14 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect, useCallback } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
+
+interface HeroSectionProps {
+  register?: (id: string, rect: DOMRect) => void
+  setActive?: (id: string, active: boolean) => void
+  unregister?: (id: string) => void
+}
 
 function AnimatedWord({ word, index }: { word: string; index: number }) {
   return (
@@ -21,8 +27,27 @@ function AnimatedWord({ word, index }: { word: string; index: number }) {
   )
 }
 
-export function HeroSection() {
+export function HeroSection({ register, setActive, unregister }: HeroSectionProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLAnchorElement>(null)
+  const ATTRACTOR_ID = "hero-cta"
+
+  const updatePosition = useCallback(() => {
+    if (btnRef.current && register) {
+      register(ATTRACTOR_ID, btnRef.current.getBoundingClientRect())
+    }
+  }, [register])
+
+  useEffect(() => {
+    updatePosition()
+    window.addEventListener("scroll", updatePosition)
+    window.addEventListener("resize", updatePosition)
+    return () => {
+      window.removeEventListener("scroll", updatePosition)
+      window.removeEventListener("resize", updatePosition)
+      unregister?.(ATTRACTOR_ID)
+    }
+  }, [updatePosition, unregister])
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
@@ -38,12 +63,6 @@ export function HeroSection() {
       ref={containerRef}
       className="relative flex min-h-screen items-center justify-center overflow-hidden px-6"
     >
-      {/* Background radial gradient */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/[0.07] blur-[120px]" />
-        <div className="absolute right-1/4 top-1/3 h-[400px] w-[400px] rounded-full bg-primary/[0.04] blur-[80px]" />
-      </div>
-
       {/* Subtle grid */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.03]">
         <svg width="100%" height="100%">
@@ -99,7 +118,10 @@ export function HeroSection() {
           className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
         >
           <a
+            ref={btnRef}
             href="/dashboard"
+            onMouseEnter={() => { updatePosition(); setActive?.(ATTRACTOR_ID, true) }}
+            onMouseLeave={() => setActive?.(ATTRACTOR_ID, false)}
             className="group flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 hover:shadow-[0_0_30px_oklch(0.78_0.18_155/0.3)]"
           >
             Try the Demo

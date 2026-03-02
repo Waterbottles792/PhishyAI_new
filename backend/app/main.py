@@ -18,6 +18,17 @@ from .routes import (
     dashboard_router,
     history_router,
     image_analyze_router,
+    url_analyze_router,
+    file_scan_router,
+    document_analyze_router,
+    chat_router,
+    sms_analyze_router,
+    header_analyze_router,
+    qr_analyze_router,
+    domain_analyze_router,
+    training_router,
+    threat_feed_router,
+    report_router,
 )
 
 
@@ -101,6 +112,17 @@ app.include_router(models_router, prefix="/api", tags=["Models"])
 app.include_router(dashboard_router, prefix="/api", tags=["Dashboard"])
 app.include_router(history_router, prefix="/api", tags=["History"])
 app.include_router(image_analyze_router, prefix="/api", tags=["Image Analysis"])
+app.include_router(url_analyze_router, prefix="/api", tags=["URL Analysis"])
+app.include_router(file_scan_router, prefix="/api", tags=["File Scanning"])
+app.include_router(document_analyze_router, prefix="/api", tags=["Document Analysis"])
+app.include_router(chat_router, prefix="/api", tags=["Chat"])
+app.include_router(sms_analyze_router, prefix="/api", tags=["SMS Analysis"])
+app.include_router(header_analyze_router, prefix="/api", tags=["Header Analysis"])
+app.include_router(qr_analyze_router, prefix="/api", tags=["QR Code Analysis"])
+app.include_router(domain_analyze_router, prefix="/api", tags=["Domain Monitoring"])
+app.include_router(training_router, prefix="/api", tags=["Training"])
+app.include_router(threat_feed_router, prefix="/api", tags=["Threat Intelligence"])
+app.include_router(report_router, prefix="/api", tags=["Reports"])
 
 
 @app.get("/")

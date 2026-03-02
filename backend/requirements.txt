@@ -22,3 +22,9 @@ validators
 google-generativeai
 pytesseract
 Pillow
+pyzbar
+opencv-python-headless
+dnspython
+aiohttp
+fpdf2
+cachetools
