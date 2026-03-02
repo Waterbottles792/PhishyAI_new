@@ -6,6 +6,7 @@ import {
   Mail, Link, FileSearch, FileText, ArrowUpRight, ArrowLeft,
   MessageSquare, QrCode, Globe, GraduationCap, Radar,
 } from "lucide-react"
+import CipherFlow from "@/components/cipher-flow"
 
 const modes = [
   {
@@ -120,11 +121,11 @@ const item = {
 
 export default function DashboardHub() {
   return (
-    <div className="min-h-screen bg-background">
+    <CipherFlow>
       <div className="noise-overlay pointer-events-none fixed inset-0 z-50" />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-4">
             <a href="/" className="flex items-center gap-2">
@@ -177,7 +178,7 @@ export default function DashboardHub() {
                 variants={item}
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-colors hover:border-muted-foreground/30"
+                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-6 transition-colors hover:border-muted-foreground/30 hover:bg-card/90"
               >
                 {/* Gradient background */}
                 <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${mode.color} opacity-0 transition-opacity group-hover:opacity-100`} />
@@ -197,6 +198,6 @@ export default function DashboardHub() {
           })}
         </motion.div>
       </main>
-    </div>
+    </CipherFlow>
   )
 }
