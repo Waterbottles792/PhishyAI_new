@@ -10,7 +10,8 @@ export function CTASection() {
 
   return (
     <section className="relative py-24 md:py-32 px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(0.62_0.19_250/0.06)_0%,transparent_60%)]" />
+      {/* Cyan glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(30,217,225,0.05)_0%,transparent_60%)]" />
 
       <motion.div
         ref={ref}
@@ -21,7 +22,7 @@ export function CTASection() {
       >
         <div className="relative rounded-2xl border border-primary/20 bg-card/50 backdrop-blur-sm p-8 md:p-14 text-center overflow-hidden">
           {/* Background glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.62_0.19_250/0.08)_0%,transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(30,217,225,0.06)_0%,transparent_70%)]" />
 
           <div className="relative z-10">
             <motion.div

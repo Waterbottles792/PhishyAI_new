@@ -127,7 +127,13 @@ export function FeaturesSection() {
 
   return (
     <section id="features" className="relative py-24 md:py-32 px-4">
-      <div className="mx-auto max-w-7xl">
+      {/* Vibrant lime glow overlay */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(145,237,18,0.07),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_30%_60%,rgba(145,237,18,0.03),transparent_60%)]" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl">
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 30 }}
@@ -135,7 +141,7 @@ export function FeaturesSection() {
           transition={{ duration: 0.6 }}
           className="mb-16 text-center"
         >
-          <span className="mb-4 inline-block rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+          <span className="mb-4 inline-block rounded-full border border-[#91ed12]/30 bg-[#91ed12]/5 px-3 py-1 text-xs font-medium text-[#91ed12]">
             Core Capabilities
           </span>
           <h2 className="mt-4 text-3xl md:text-4xl font-bold text-foreground text-balance">

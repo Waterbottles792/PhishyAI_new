@@ -3,7 +3,10 @@
     "allow": [
       "Bash(mkdir -p backend/app/{models,features,explainability,routes,schemas,database,utils} backend/data/{raw,processed,models} backend/notebooks backend/scripts backend/tests)",
       "Bash(curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(npm run:*)",
+      "WebSearch",
+      "WebFetch(domain:ai-sdk.dev)"
     ],
     "deny": [],
     "ask": []

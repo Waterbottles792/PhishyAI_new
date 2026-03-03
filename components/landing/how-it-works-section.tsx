@@ -60,8 +60,11 @@ export function HowItWorksSection() {
       id="how-it-works"
       className="relative py-24 md:py-32 px-4"
     >
-      {/* Subtle background accent */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.62_0.19_250/0.04)_0%,transparent_60%)]" />
+      {/* Vibrant teal glow overlay */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(28,227,178,0.07),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_70%_80%,rgba(28,227,178,0.04),transparent_60%)]" />
+      </div>
 
       <div className="relative mx-auto max-w-5xl">
         <motion.div
@@ -71,7 +74,7 @@ export function HowItWorksSection() {
           transition={{ duration: 0.6 }}
           className="mb-20 text-center"
         >
-          <span className="mb-4 inline-block rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+          <span className="mb-4 inline-block rounded-full border border-[#1ce3b2]/30 bg-[#1ce3b2]/5 px-3 py-1 text-xs font-medium text-[#1ce3b2]">
             How It Works
           </span>
           <h2 className="mt-4 text-3xl md:text-4xl font-bold text-foreground text-balance">
@@ -85,7 +88,7 @@ export function HowItWorksSection() {
 
         <div className="relative">
           {/* Vertical line connector (desktop) */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-primary/20 via-warning/20 to-success/20" />
+          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-[#1ce3b2]/30 via-[#1ce3b2]/15 to-[#1ce3b2]/30" />
 
           <div className="flex flex-col gap-16 md:gap-24">
             {steps.map((step, index) => {

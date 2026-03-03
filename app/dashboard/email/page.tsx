@@ -857,7 +857,7 @@ export default function EmailDashboardPage() {
         </Tabs>
       </main>
 
-      <AIChatbox context={result} />
+      <AIChatbox context={{ subject, body, result }} />
     </div>
   )
 }

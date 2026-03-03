@@ -35,10 +35,6 @@ export function CTASection({ register, setActive, unregister }: CTASectionProps 
 
   return (
     <section className="relative border-t border-border py-24 md:py-32">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute bottom-0 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-primary/[0.05] blur-[100px]" />
-      </div>
-
       <motion.div
         ref={ref}
         initial={{ opacity: 0, y: 40 }}

@@ -93,7 +93,7 @@ export function HowItWorksSection() {
             transition={{ duration: 0.6 }}
             className="lg:sticky lg:top-32 lg:self-start"
           >
-            <p className="mb-3 text-sm font-medium uppercase tracking-widest text-primary">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
               Process
             </p>
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-5xl text-balance">
@@ -103,36 +103,6 @@ export function HowItWorksSection() {
               From raw email to explained verdict in under 200ms. Four steps,
               zero guesswork.
             </p>
-
-            {/* Decorative element */}
-            <div className="mt-10 hidden lg:block">
-              <div className="relative h-48 w-full overflow-hidden rounded-xl border border-border bg-card/30">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative">
-                    {[...Array(3)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0.3, 0, 0.3],
-                        }}
-                        transition={{
-                          duration: 3,
-                          delay: i * 0.8,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        className="absolute -inset-6 rounded-full border border-primary/20"
-                        style={{ inset: `${-24 - i * 24}px` }}
-                      />
-                    ))}
-                    <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
-                      <Cpu className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </motion.div>
 
           {/* Right - steps */}

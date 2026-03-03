@@ -79,7 +79,11 @@ export function ModelsSection() {
 
   return (
     <section id="models" className="relative py-24 md:py-32 px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(0.65_0.17_160/0.04)_0%,transparent_60%)]" />
+      {/* Vibrant cyan glow overlay */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(30,217,225,0.07),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_100%,rgba(30,217,225,0.04),transparent_60%)]" />
+      </div>
 
       <div className="relative mx-auto max-w-6xl">
         <motion.div
@@ -89,7 +93,7 @@ export function ModelsSection() {
           transition={{ duration: 0.6 }}
           className="mb-16 text-center"
         >
-          <span className="mb-4 inline-block rounded-full border border-success/30 bg-success/5 px-3 py-1 text-xs font-medium text-success">
+          <span className="mb-4 inline-block rounded-full border border-[#1ed9e1]/30 bg-[#1ed9e1]/5 px-3 py-1 text-xs font-medium text-[#1ed9e1]">
             Model Performance
           </span>
           <h2 className="mt-4 text-3xl md:text-4xl font-bold text-foreground text-balance">

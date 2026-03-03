@@ -3,8 +3,8 @@
 import { motion } from "framer-motion"
 import { UserButton } from "@clerk/nextjs"
 import {
-  Mail, Link, FileSearch, FileText, ArrowUpRight, ArrowLeft,
-  MessageSquare, QrCode, Globe, GraduationCap, Radar,
+  Mail, Link, FileText, ArrowUpRight, ArrowLeft,
+  QrCode, Globe, GraduationCap, Radar,
 } from "lucide-react"
 import CipherFlow from "@/components/cipher-flow"
 
@@ -26,33 +26,6 @@ const modes = [
     color: "from-blue-500/20 to-blue-500/5",
     iconBg: "bg-blue-500/10",
     iconColor: "text-blue-500",
-  },
-  {
-    title: "File Scanner",
-    description: "Scan uploaded files for malicious content, dangerous extensions, and embedded threats",
-    icon: FileSearch,
-    href: "/dashboard/file",
-    color: "from-orange-500/20 to-orange-500/5",
-    iconBg: "bg-orange-500/10",
-    iconColor: "text-orange-500",
-  },
-  {
-    title: "Document Analysis",
-    description: "Analyze documents (PDF, DOCX, TXT) for hidden threats, suspicious URLs, and macros",
-    icon: FileText,
-    href: "/dashboard/document",
-    color: "from-violet-500/20 to-violet-500/5",
-    iconBg: "bg-violet-500/10",
-    iconColor: "text-violet-500",
-  },
-  {
-    title: "SMS Scanner",
-    description: "Detect smishing attacks by analyzing SMS messages for suspicious links and social engineering",
-    icon: MessageSquare,
-    href: "/dashboard/sms",
-    color: "from-cyan-500/20 to-cyan-500/5",
-    iconBg: "bg-cyan-500/10",
-    iconColor: "text-cyan-500",
   },
   {
     title: "Header Analysis",
@@ -82,15 +55,6 @@ const modes = [
     iconColor: "text-red-500",
   },
   {
-    title: "Phishing Training",
-    description: "Test your phishing detection skills with AI-generated email challenges at varying difficulty",
-    icon: GraduationCap,
-    href: "/dashboard/training",
-    color: "from-teal-500/20 to-teal-500/5",
-    iconBg: "bg-teal-500/10",
-    iconColor: "text-teal-500",
-  },
-  {
     title: "Threat Intelligence",
     description: "Live feed of active phishing threats from public threat databases with AI trend analysis",
     icon: Radar,
@@ -98,6 +62,15 @@ const modes = [
     color: "from-rose-500/20 to-rose-500/5",
     iconBg: "bg-rose-500/10",
     iconColor: "text-rose-500",
+  },
+  {
+    title: "Phishing Training",
+    description: "Test your phishing detection skills with AI-generated challenges and get real-time coaching",
+    icon: GraduationCap,
+    href: "/dashboard/training",
+    color: "from-teal-500/20 to-teal-500/5",
+    iconBg: "bg-teal-500/10",
+    iconColor: "text-teal-500",
   },
 ]
 
@@ -158,7 +131,7 @@ export default function DashboardHub() {
             Choose an analysis mode
           </h1>
           <p className="mx-auto max-w-lg text-muted-foreground">
-            Select a tool to scan emails, URLs, files, documents, SMS messages, QR codes, and more.
+            Select a tool to scan emails, URLs, documents, QR codes, and more.
           </p>
         </motion.div>
 

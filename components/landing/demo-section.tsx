@@ -114,7 +114,8 @@ export function DemoSection() {
 
   return (
     <section id="demo" className="relative py-24 md:py-32 px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,oklch(0.58_0.22_25/0.04)_0%,transparent_60%)]" />
+      {/* Teal-to-cyan transition glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_80%,rgba(28,227,178,0.05),transparent_70%)]" />
 
       <div className="relative mx-auto max-w-6xl">
         <motion.div

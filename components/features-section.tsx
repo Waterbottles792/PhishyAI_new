@@ -2,16 +2,7 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
-import {
-  Shield,
-  Zap,
-  BarChart3,
-  FileSearch,
-  Brain,
-  Network,
-  Eye,
-  Upload,
-} from "lucide-react"
+import { Shield, Brain, Eye, FileSearch, BarChart3, Network } from "lucide-react"
 
 const features = [
   {
@@ -45,22 +36,10 @@ const features = [
       "Dataset insights, threat distribution charts, timeline trends, and top feature triggers at a glance.",
   },
   {
-    icon: Upload,
-    title: "Batch Analysis",
-    description:
-      "Upload a CSV of emails for bulk scanning. Get results exported with individual threat assessments.",
-  },
-  {
     icon: Network,
     title: "Threat Level System",
     description:
       "Four-tier classification: Low, Medium, High, and Critical, with highlighted risk indicators in the email body.",
-  },
-  {
-    icon: Zap,
-    title: "Instant API Access",
-    description:
-      "RESTful FastAPI backend with Swagger docs. Integrate phishing detection directly into your existing workflow.",
   },
 ]
 
@@ -77,19 +56,19 @@ function FeatureCard({
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 32 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{
         duration: 0.5,
-        delay: index * 0.08,
+        delay: index * 0.07,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="group relative rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:border-primary/30 hover:bg-card"
+      className="group relative rounded-2xl border border-border bg-card/40 p-8 transition-colors duration-300 hover:border-primary/25 hover:bg-card"
     >
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+      <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
         <feature.icon className="h-5 w-5" />
       </div>
-      <h3 className="mb-2 text-base font-semibold text-foreground">{feature.title}</h3>
+      <h3 className="mb-2.5 text-base font-semibold text-foreground">{feature.title}</h3>
       <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
     </motion.div>
   )
@@ -104,24 +83,24 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           ref={headingRef}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={isHeadingInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="mb-16 max-w-2xl"
+          className="mb-14 max-w-xl"
         >
-          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-primary">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
             Capabilities
           </p>
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-5xl text-balance">
             Everything you need to fight phishing
           </h2>
-          <p className="text-lg leading-relaxed text-muted-foreground">
+          <p className="text-base leading-relaxed text-muted-foreground">
             An end-to-end detection pipeline built on research-grade ML with
             full transparency into every decision.
           </p>
         </motion.div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <FeatureCard key={f.title} feature={f} index={i} />
           ))}

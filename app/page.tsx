@@ -4,7 +4,6 @@ import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { StatsSection } from "@/components/stats-section"
 import { FeaturesSection } from "@/components/features-section"
-import { MarqueeSection } from "@/components/marquee-section"
 import { HowItWorksSection } from "@/components/how-it-works-section"
 import { DemoSection } from "@/components/demo-section"
 import { ModelsSection } from "@/components/models-section"
@@ -23,7 +22,6 @@ export default function Home() {
       <HeroSection register={register} setActive={setActive} unregister={unregister} />
       <StatsSection />
       <FeaturesSection />
-      <MarqueeSection />
       <HowItWorksSection />
       <DemoSection />
       <ModelsSection />

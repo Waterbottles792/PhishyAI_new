@@ -1,14 +1,10 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
+import { useChat } from "@ai-sdk/react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MessageCircle, X, Send, Loader2, Bot, User } from "lucide-react"
+import { MessageCircle, X, Send, Loader2, Bot, User, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-interface Message {
-  role: "user" | "assistant"
-  content: string
-}
 
 interface AIChatboxProps {
   context?: Record<string, any> | null
@@ -16,42 +12,17 @@ interface AIChatboxProps {
 
 export function AIChatbox({ context }: AIChatboxProps) {
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
-  const [loading, setLoading] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages, loading])
+  const { messages, sendMessage, status, stop } = useChat()
 
-  async function handleSend() {
+  const isLoading = status === "streaming" || status === "submitted"
+
+  function handleSend() {
     const text = input.trim()
-    if (!text || loading) return
-
+    if (!text || isLoading) return
     setInput("")
-    setMessages((prev) => [...prev, { role: "user", content: text }])
-    setLoading(true)
-
-    try {
-      const res = await fetch("http://localhost:8000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, context: context ?? null }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.detail || "Failed to get response")
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }])
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, I couldn't get a response. Please try again." },
-      ])
-    } finally {
-      setLoading(false)
-    }
+    sendMessage({ text }, { body: { context: context ?? null } })
   }
 
   return (
@@ -93,7 +64,9 @@ export function AIChatbox({ context }: AIChatboxProps) {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">PhishGuard AI</p>
-                  <p className="text-[10px] text-muted-foreground">Ask about the analysis</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {context?.mode === "training" ? "Ask for phishing detection hints" : "Ask about the analysis"}
+                  </p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpen(false)}>
@@ -102,24 +75,27 @@ export function AIChatbox({ context }: AIChatboxProps) {
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-              {messages.length === 0 && !loading && (
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              {messages.length === 0 && !isLoading && (
                 <div className="flex h-full flex-col items-center justify-center text-center">
                   <Bot className="mb-3 h-10 w-10 text-muted-foreground/40" />
                   <p className="text-sm font-medium text-muted-foreground">Ask me anything</p>
                   <p className="mt-1 text-xs text-muted-foreground/60">
-                    {context
-                      ? "I have context about the current analysis."
-                      : "Scan something first for context-aware answers."}
+                    {context?.mode === "training"
+                      ? "I can help you learn to spot phishing emails."
+                      : context
+                        ? "I have context about the current analysis."
+                        : "Scan something first for context-aware answers."}
                   </p>
                   <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-                    {["Why is this suspicious?", "What should I do?", "Is this safe to click?"].map(
+                    {(context?.mode === "training"
+                      ? ["What should I look for?", "Any red flags in the sender?", "How do I check if links are safe?"]
+                      : ["Why is this suspicious?", "What should I do?", "Is this safe to click?"]
+                    ).map(
                       (q) => (
                         <button
                           key={q}
-                          onClick={() => {
-                            setInput(q)
-                          }}
+                          onClick={() => setInput(q)}
                           className="rounded-full border border-border bg-muted/50 px-3 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         >
                           {q}
@@ -130,9 +106,9 @@ export function AIChatbox({ context }: AIChatboxProps) {
                 </div>
               )}
 
-              {messages.map((msg, i) => (
+              {messages.map((msg) => (
                 <div
-                  key={i}
+                  key={msg.id}
                   className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.role === "assistant" && (
@@ -147,7 +123,9 @@ export function AIChatbox({ context }: AIChatboxProps) {
                         : "bg-muted/60 text-foreground"
                     }`}
                   >
-                    {msg.content}
+                    {msg.parts.map((part, i) =>
+                      part.type === "text" ? <span key={i}>{part.text}</span> : null
+                    )}
                   </div>
                   {msg.role === "user" && (
                     <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted">
@@ -157,7 +135,7 @@ export function AIChatbox({ context }: AIChatboxProps) {
                 </div>
               ))}
 
-              {loading && (
+              {isLoading && messages.at(-1)?.role !== "assistant" && (
                 <div className="flex items-center gap-2">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <Bot className="h-3.5 w-3.5 text-primary" />
@@ -182,17 +160,28 @@ export function AIChatbox({ context }: AIChatboxProps) {
                     }
                   }}
                   placeholder="Ask a question..."
-                  disabled={loading}
+                  disabled={isLoading}
                   className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
                 />
-                <Button
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-full"
-                  disabled={!input.trim() || loading}
-                  onClick={handleSend}
-                >
-                  <Send className="h-3.5 w-3.5" />
-                </Button>
+                {isLoading ? (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8 shrink-0 rounded-full"
+                    onClick={stop}
+                  >
+                    <Square className="h-3 w-3" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    className="h-8 w-8 shrink-0 rounded-full"
+                    disabled={!input.trim()}
+                    onClick={handleSend}
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>

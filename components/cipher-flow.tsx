@@ -8,12 +8,34 @@ const PARTICLE_COUNT = 140
 const TRAIL_LENGTH = 22
 const HEX_SPACING = 42
 const DOT_BASE = 1.0
-const DOT_GLOW = 2.8
+const DOT_GLOW = 3.0
 const ALPHA_BASE = 0.06
-const ALPHA_GLOW = 0.4
+const ALPHA_GLOW = 0.45
 const MOUSE_R = 240
 const PULSE_GAP = 5500
 const SCAN_SPEED = 0.35
+
+/* ─── Scroll-reactive color stops (hue per section) ─────────── */
+const SECTION_COLORS = [
+  { at: 0.00, hue: 155 }, // Hero – emerald green
+  { at: 0.18, hue: 85 },  // Features – lime (#91ed12)
+  { at: 0.42, hue: 165 }, // How it Works – teal (#1ce3b2)
+  { at: 0.70, hue: 182 }, // Models – cyan (#1ed9e1)
+  { at: 1.00, hue: 182 }, // End – stay cyan
+]
+
+function lerpHue(progress: number): number {
+  let i = 0
+  while (i < SECTION_COLORS.length - 1 && SECTION_COLORS[i + 1].at <= progress) i++
+  const a = SECTION_COLORS[i]
+  const b = SECTION_COLORS[Math.min(i + 1, SECTION_COLORS.length - 1)]
+  if (a.at === b.at) return a.hue
+  const t = (progress - a.at) / (b.at - a.at)
+  let diff = b.hue - a.hue
+  if (diff > 180) diff -= 360
+  if (diff < -180) diff += 360
+  return ((a.hue + diff * t) % 360 + 360) % 360
+}
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface Particle {
@@ -22,7 +44,7 @@ interface Particle {
   trail: Float64Array
   trailIdx: number
   speed: number
-  hue: number
+  hueOffset: number
   alpha: number
 }
 
@@ -30,12 +52,12 @@ interface Orb {
   cx: number
   cy: number
   r: number
-  hue: number
+  hueOffset: number
   alpha: number
-  px: number // phase x
-  py: number // phase y
-  sx: number // speed x
-  sy: number // speed y
+  px: number
+  py: number
+  sx: number
+  sy: number
 }
 
 interface Pulse {
@@ -115,8 +137,8 @@ export default function CipherFlow({
         trail,
         trailIdx: 0,
         speed: 0.35 + Math.random() * 0.75,
-        hue: 150 + Math.random() * 35,
-        alpha: 0.12 + Math.random() * 0.22,
+        hueOffset: (Math.random() - 0.5) * 40,
+        alpha: 0.15 + Math.random() * 0.25,
       }
     }
 
@@ -126,9 +148,9 @@ export default function CipherFlow({
 
     function initOrbs(w: number, h: number) {
       orbs.current = [
-        { cx: w * 0.2, cy: h * 0.3, r: 380, hue: 155, alpha: 0.03, px: 0, py: 1.2, sx: 0.15, sy: 0.1 },
-        { cx: w * 0.8, cy: h * 0.55, r: 320, hue: 195, alpha: 0.025, px: 2.4, py: 0, sx: 0.1, sy: 0.13 },
-        { cx: w * 0.5, cy: h * 0.85, r: 300, hue: 265, alpha: 0.02, px: 4.0, py: 3.1, sx: 0.08, sy: 0.09 },
+        { cx: w * 0.2, cy: h * 0.3, r: 400, hueOffset: 0, alpha: 0.045, px: 0, py: 1.2, sx: 0.15, sy: 0.1 },
+        { cx: w * 0.8, cy: h * 0.55, r: 350, hueOffset: 35, alpha: 0.04, px: 2.4, py: 0, sx: 0.1, sy: 0.13 },
+        { cx: w * 0.5, cy: h * 0.85, r: 320, hueOffset: -25, alpha: 0.035, px: 4.0, py: 3.1, sx: 0.08, sy: 0.09 },
       ]
     }
 
@@ -153,18 +175,25 @@ export default function CipherFlow({
       const mx = mouse.current.x
       const my = mouse.current.y
 
+      // Scroll-reactive hue
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      const scrollProgress = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0
+      const hue = lerpHue(scrollProgress)
+
       ctx!.clearRect(0, 0, w, h)
 
       /* ─ Layer 1: Ambient orbs ─────────────────────────────── */
       for (const o of orbs.current) {
         const ox = o.cx + Math.sin(t * o.sx + o.px) * w * 0.12
         const oy = o.cy + Math.cos(t * o.sy + o.py) * h * 0.1
-        const pulse = Math.sin(t * 0.4 + o.px) * 0.006
+        const pulse = Math.sin(t * 0.4 + o.px) * 0.008
         const a = o.alpha + pulse
+        const orbHue = ((hue + o.hueOffset) % 360 + 360) % 360
+
         const g = ctx!.createRadialGradient(ox, oy, 0, ox, oy, o.r)
-        g.addColorStop(0, `hsla(${o.hue}, 75%, 55%, ${a})`)
-        g.addColorStop(0.4, `hsla(${o.hue}, 70%, 50%, ${a * 0.45})`)
-        g.addColorStop(1, `hsla(${o.hue}, 60%, 45%, 0)`)
+        g.addColorStop(0, `hsla(${orbHue}, 85%, 55%, ${a})`)
+        g.addColorStop(0.4, `hsla(${orbHue}, 80%, 50%, ${a * 0.45})`)
+        g.addColorStop(1, `hsla(${orbHue}, 70%, 45%, 0)`)
         ctx!.fillStyle = g
         ctx!.beginPath()
         ctx!.arc(ox, oy, o.r, 0, Math.PI * 2)
@@ -193,7 +222,7 @@ export default function CipherFlow({
 
           if (alpha < 0.015) continue
 
-          ctx!.fillStyle = `rgba(160, 235, 200, ${alpha})`
+          ctx!.fillStyle = `hsla(${hue}, 80%, 72%, ${alpha})`
           ctx!.beginPath()
           ctx!.arc(dx, dy, size, 0, Math.PI * 2)
           ctx!.fill()
@@ -203,9 +232,9 @@ export default function CipherFlow({
       /* ─ Layer 3: Mouse cursor glow ────────────────────────── */
       if (mx > 0 && my > 0) {
         const mg = ctx!.createRadialGradient(mx, my, 0, mx, my, MOUSE_R * 0.6)
-        mg.addColorStop(0, "hsla(160, 80%, 60%, 0.04)")
-        mg.addColorStop(0.5, "hsla(160, 70%, 50%, 0.015)")
-        mg.addColorStop(1, "hsla(160, 60%, 40%, 0)")
+        mg.addColorStop(0, `hsla(${hue}, 85%, 62%, 0.06)`)
+        mg.addColorStop(0.5, `hsla(${hue}, 80%, 52%, 0.025)`)
+        mg.addColorStop(1, `hsla(${hue}, 70%, 40%, 0)`)
         ctx!.fillStyle = mg
         ctx!.beginPath()
         ctx!.arc(mx, my, MOUSE_R * 0.6, 0, Math.PI * 2)
@@ -249,19 +278,22 @@ export default function CipherFlow({
           p.trailIdx = 0
         }
 
+        // Compute hue from scroll position + particle offset
+        const particleHue = ((hue + p.hueOffset) % 360 + 360) % 360
+
         // Draw trail (fading segments, oldest first)
         for (let i = 1; i < TRAIL_LENGTH; i++) {
           const ci = (p.trailIdx + i) % TRAIL_LENGTH
-          const pi = (p.trailIdx + i - 1) % TRAIL_LENGTH
+          const pi2 = (p.trailIdx + i - 1) % TRAIL_LENGTH
           const progress = i / TRAIL_LENGTH
           const segA = p.alpha * progress * progress * 0.55
           if (segA < 0.005) continue
 
-          ctx!.strokeStyle = `hsla(${p.hue}, 80%, 65%, ${segA})`
+          ctx!.strokeStyle = `hsla(${particleHue}, 85%, 65%, ${segA})`
           ctx!.lineWidth = 0.4 + progress * 1.4
           ctx!.lineCap = "round"
           ctx!.beginPath()
-          ctx!.moveTo(p.trail[pi * 2], p.trail[pi * 2 + 1])
+          ctx!.moveTo(p.trail[pi2 * 2], p.trail[pi2 * 2 + 1])
           ctx!.lineTo(p.trail[ci * 2], p.trail[ci * 2 + 1])
           ctx!.stroke()
         }
@@ -271,8 +303,8 @@ export default function CipherFlow({
         const hx = p.trail[headIdx * 2]
         const hy = p.trail[headIdx * 2 + 1]
         const glow = ctx!.createRadialGradient(hx, hy, 0, hx, hy, 5)
-        glow.addColorStop(0, `hsla(${p.hue}, 90%, 75%, ${p.alpha * 0.8})`)
-        glow.addColorStop(1, `hsla(${p.hue}, 80%, 60%, 0)`)
+        glow.addColorStop(0, `hsla(${particleHue}, 92%, 75%, ${p.alpha * 0.85})`)
+        glow.addColorStop(1, `hsla(${particleHue}, 85%, 60%, 0)`)
         ctx!.fillStyle = glow
         ctx!.beginPath()
         ctx!.arc(hx, hy, 5, 0, Math.PI * 2)
@@ -293,7 +325,7 @@ export default function CipherFlow({
         p.r = progress * Math.max(w, h) * 0.55
         const a = (1 - progress) * (1 - progress) * 0.12
 
-        ctx!.strokeStyle = `hsla(160, 80%, 60%, ${a})`
+        ctx!.strokeStyle = `hsla(${hue}, 85%, 60%, ${a})`
         ctx!.lineWidth = 1.8 * (1 - progress)
         ctx!.beginPath()
         ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2)
@@ -305,11 +337,11 @@ export default function CipherFlow({
       scanY.current = (scanY.current + SCAN_SPEED) % (h + 120)
       const sy = scanY.current - 60
       const sg = ctx!.createLinearGradient(0, sy, 0, sy + 60)
-      sg.addColorStop(0, "hsla(160, 80%, 60%, 0)")
-      sg.addColorStop(0.4, "hsla(160, 80%, 60%, 0.018)")
-      sg.addColorStop(0.5, "hsla(160, 80%, 60%, 0.025)")
-      sg.addColorStop(0.6, "hsla(160, 80%, 60%, 0.018)")
-      sg.addColorStop(1, "hsla(160, 80%, 60%, 0)")
+      sg.addColorStop(0, `hsla(${hue}, 85%, 60%, 0)`)
+      sg.addColorStop(0.4, `hsla(${hue}, 85%, 60%, 0.022)`)
+      sg.addColorStop(0.5, `hsla(${hue}, 85%, 60%, 0.032)`)
+      sg.addColorStop(0.6, `hsla(${hue}, 85%, 60%, 0.022)`)
+      sg.addColorStop(1, `hsla(${hue}, 85%, 60%, 0)`)
       ctx!.fillStyle = sg
       ctx!.fillRect(0, sy, w, 60)
 

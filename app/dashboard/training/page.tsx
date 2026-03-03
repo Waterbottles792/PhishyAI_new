@@ -13,21 +13,21 @@ import {
   CheckCircle,
   XCircle,
   RotateCcw,
+  HelpCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   severityIcon,
   severityColor,
   threatBadgeClass,
 } from "@/components/dashboard/result-card"
+import { AIChatbox } from "@/components/dashboard/ai-chatbox"
 
 interface QuizEmail {
   quiz_id: string
@@ -106,6 +106,18 @@ export default function TrainingPage() {
       setChecking(false)
     }
   }
+
+  const chatContext = email
+    ? {
+        subject: email.email_subject,
+        body: email.email_body,
+        mode: "training",
+        sender: email.email_sender,
+        hasAnswered: !!result,
+        wasCorrect: result?.correct,
+        actualAnswer: result?.actual_answer,
+      }
+    : { mode: "training" }
 
   return (
     <div className="min-h-screen bg-background">
@@ -355,8 +367,24 @@ export default function TrainingPage() {
               </Card>
             </motion.div>
           )}
+          {/* AI Help Hint */}
+          {email && !result && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-center justify-center gap-2 rounded-lg border border-teal-500/20 bg-teal-500/[0.03] px-4 py-3"
+            >
+              <HelpCircle className="h-4 w-4 text-teal-500" />
+              <p className="text-xs text-muted-foreground">
+                Stuck? Click the <span className="font-medium text-teal-500">chat bubble</span> in the bottom-right to ask the AI assistant for hints on how to detect phishing.
+              </p>
+            </motion.div>
+          )}
         </motion.div>
       </main>
+
+      <AIChatbox context={chatContext} />
     </div>
   )
 }
