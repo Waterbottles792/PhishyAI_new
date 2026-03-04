@@ -21,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { DashboardPageHeader } from "@/components/dashboard/page-header"
 
 interface ThreatEntry {
   url: string
@@ -74,30 +75,7 @@ export default function ThreatFeedPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="noise-overlay pointer-events-none fixed inset-0 z-50" />
-
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
-            <a href="/dashboard" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary-foreground">
-                  <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" fill="currentColor" opacity="0.3" />
-                  <path d="M12 2L3 7l9 5 9-5-9-5z" fill="currentColor" />
-                  <path d="M12 12v10l9-5V7l-9 5z" fill="currentColor" opacity="0.6" />
-                </svg>
-              </div>
-              <span className="text-lg font-semibold tracking-tight text-foreground">PhishGuard</span>
-            </a>
-            <div className="hidden h-6 w-px bg-border sm:block" />
-            <span className="hidden text-sm text-muted-foreground sm:block">Threat Intelligence</span>
-          </div>
-          <Button variant="outline" size="sm" onClick={fetchFeed} disabled={loading}>
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-        </div>
-      </header>
+      <DashboardPageHeader title="Threat Intelligence" />
 
       <main className="mx-auto max-w-5xl px-6 py-8">
         {/* Error */}

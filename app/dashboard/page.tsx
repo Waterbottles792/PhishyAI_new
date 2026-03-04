@@ -1,10 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { UserButton } from "@clerk/nextjs"
 import {
-  Mail, Link, FileText, ArrowUpRight, ArrowLeft,
+  Mail, Link, FileText, ArrowUpRight,
   QrCode, Globe, GraduationCap, Radar,
+  RefreshCw, Network, Brain, Monitor,
 } from "lucide-react"
 import CipherFlow from "@/components/cipher-flow"
 
@@ -72,6 +72,42 @@ const modes = [
     iconBg: "bg-teal-500/10",
     iconColor: "text-teal-500",
   },
+  {
+    title: "Active Learning",
+    description: "Report false positives and negatives to retrain models. Shadow-deploy new versions automatically",
+    icon: RefreshCw,
+    href: "/dashboard/feedback",
+    color: "from-orange-500/20 to-orange-500/5",
+    iconBg: "bg-orange-500/10",
+    iconColor: "text-orange-500",
+  },
+  {
+    title: "Campaign Tracker",
+    description: "Map attack infrastructure — domains, IPs, ASNs, SSL certs, and registrars — into a visual knowledge graph",
+    icon: Network,
+    href: "/dashboard/campaign",
+    color: "from-cyan-500/20 to-cyan-500/5",
+    iconBg: "bg-cyan-500/10",
+    iconColor: "text-cyan-500",
+  },
+  {
+    title: "DGA Detector",
+    description: "Detect algorithmically generated domains using LSTM + 1D CNN on character entropy, bigrams, and n-grams",
+    icon: Brain,
+    href: "/dashboard/dga",
+    color: "from-purple-500/20 to-purple-500/5",
+    iconBg: "bg-purple-500/10",
+    iconColor: "text-purple-500",
+  },
+  {
+    title: "Browser Sandbox",
+    description: "Open URLs in an isolated headless browser to detect evasive JavaScript, credential forms, and drive-by downloads",
+    icon: Monitor,
+    href: "/dashboard/sandbox",
+    color: "from-violet-500/20 to-violet-500/5",
+    iconBg: "bg-violet-500/10",
+    iconColor: "text-violet-500",
+  },
 ]
 
 const container = {
@@ -97,26 +133,9 @@ export default function DashboardHub() {
     <CipherFlow>
       <div className="noise-overlay pointer-events-none fixed inset-0 z-50" />
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/60 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
-            <a href="/" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary-foreground">
-                  <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" fill="currentColor" opacity="0.3" />
-                  <path d="M12 2L3 7l9 5 9-5-9-5z" fill="currentColor" />
-                  <path d="M12 12v10l9-5V7l-9 5z" fill="currentColor" opacity="0.6" />
-                </svg>
-              </div>
-              <span className="text-lg font-semibold tracking-tight text-foreground">PhishGuard</span>
-            </a>
-            <div className="hidden h-6 w-px bg-border sm:block" />
-            <span className="hidden text-sm text-muted-foreground sm:block">Dashboard</span>
-          </div>
-          <UserButton />
-        </div>
+      {/* Minimal top bar for hub */}
+      <header className="sticky top-0 z-30 flex h-12 items-center border-b border-border/50 bg-background/60 backdrop-blur-xl px-6">
+        <span className="text-sm font-medium text-foreground">Dashboard</span>
       </header>
 
       <main className="mx-auto max-w-5xl px-6 py-16">

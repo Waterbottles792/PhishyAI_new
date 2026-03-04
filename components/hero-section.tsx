@@ -222,28 +222,12 @@ export function HeroSection({ register, setActive, unregister }: HeroSectionProp
   }, [updatePosition, unregister])
 
   return (
-    <section className="relative flex min-h-screen items-center px-6 pt-20">
+    <section id="hero" className="relative flex min-h-screen items-center px-6 pt-20">
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
 
           {/* Left — copy */}
           <div>
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
-              className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/40 px-3.5 py-1.5"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-              <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                AI Threat Detection
-              </span>
-            </motion.div>
-
             {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
