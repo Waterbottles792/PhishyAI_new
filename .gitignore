@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+backend/lib/
 lib64/
 parts/
 sdist/
@@ -27,6 +27,7 @@ env/
 ENV/
 env.bak/
 venv.bak/
+backend/venv/
 
 # IDEs
 .vscode/
@@ -42,6 +43,11 @@ venv.bak/
 # Environment variables
 .env
 .env.local
+.env.production
+.env.development
+
+# Secrets folder — never commit this
+secrets/
 
 # Database
 *.db
@@ -86,5 +92,8 @@ tmp/
 temp/
 .next/
 
-# clerk configuration (can include secrets)
+# Clerk configuration (can include secrets)
 /.clerk/
+
+# Claude local settings
+.claude/settings.local.json
