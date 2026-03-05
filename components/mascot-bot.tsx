@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { motion, AnimatePresence, useAnimation } from "framer-motion"
-import { X, Send, Loader2, Bot } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { X, Send, Loader2 } from "lucide-react"
 
 // Section map for navigation commands
 const SECTION_MAP: Record<string, string> = {
@@ -200,21 +200,20 @@ export function MascotBot() {
     }
   }
 
-  if (pos.x === 0 && pos.y === 0) return null
+  if (!pos) return null
 
   return (
     <>
-      {/* Mascot body */}
-      <motion.div
-        animate={open ? { x: window.innerWidth - 380, y: window.innerHeight - 520 } : controls}
-        initial={pos}
-        drag={!open}
-        dragMomentum={false}
-        onDragEnd={(_, info) => {
-          posRef.current = { x: pos.x + info.offset.x, y: pos.y + info.offset.y }
-        }}
+      {/* Mascot body — positioned via top/left with CSS transition for smooth wander */}
+      <div
+        ref={mascotRef}
         className="fixed z-[60] cursor-grab active:cursor-grabbing select-none"
-        style={{ touchAction: "none" }}
+        style={{
+          top: open ? window.innerHeight - 520 : pos.top,
+          left: open ? window.innerWidth - 390 : pos.left,
+          transition: open ? "top 0.4s ease, left 0.4s ease" : "top 4s ease-in-out, left 4s ease-in-out",
+          touchAction: "none",
+        }}
       >
         <motion.div
           animate={{
@@ -261,7 +260,7 @@ export function MascotBot() {
             </motion.div>
           )}
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Chat panel */}
       <AnimatePresence>
